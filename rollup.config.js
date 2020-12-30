@@ -89,7 +89,8 @@ function createConfig(format, output, plugins = []) {
   const isBrowserESMBuild = /esm-browser/.test(format)
   const isNodeBuild = format === 'cjs'
   const isGlobalBuild = /global/.test(format)
-
+  // 打开sourcemap
+  output.sourcemap = true;
   if (isGlobalBuild) {
     output.name = packageOptions.name
   }

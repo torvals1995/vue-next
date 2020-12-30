@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>composition API</title>
+</head>
+<body>
+  <div id="app"></div>
+  <script src="../dist/vue.global.js"></script>
+  <script>
+    const {createApp, reactive, ref, toRefs, 
+      computed, watch, onMounted} = Vue
+
+    // 方法一：丑陋
+    {
+    // const App = {
+    //   template: `<div @click="onClick">{{count}}</div>`,
+    //   setup(){
+    //     const state = reactive({count: 0})
+    //     state.onClick = function(){
+    //       state.count+=1;
+    //     }
+    //     // 返回的对象将来会和render函数上下文合并，这样template的message可以直接访问到
+    //     return state
+    //   }
+    // }
+    }
+    // 方法二
+    {
+    // const App = {
+    //   template: `<div @click="onClick">{{state.count}}</div>`,
+    //   setup(){
+    //     const state = reactive({count: 0})
+    //     function onClick(){
+    //       state.count+=1;
+    //     }
+    //     // 返回的对象将来会和render函数上下文合并，这样template的message可以直接访问到
+    //     return {state, onClick}
+    //   }
+    // }
+    }
+    // 方法三：单独的值，使用响应式
+    {
+      const App = {
+        template: `<div @click="onClick">{{count}}</div>`,
+        setup(){
+          // ref返回的是包装对象，使用value属性与之交互
+          const count = ref(0)
+          function onClick(){
+            count.value += 1;
+          }
+          
+          // 返回的对象将来会和render函数上下文合并，这样template的message可以直接访问到
+          return {count, onClick}
+
+        }
+      }
+    }
+
+    // 方法四：toRefs
+    {
+      const App = {
+        template: `<div @click="onClick">{{count}}</div>`,
+        setup(){
+          const state = reactive({
+            count: 0,
+            foo: 'foo'
+          })
+          function onClick(){
+            state.count += 1;
+          }
+          
+          // 返回的对象将来会和render函数上下文合并，这样template的message可以直接访问到
+          return {...toRefs(state), onClick}
+
+        }
+      }
+    }
+    // 方法5：onMounted、computed、watch
+    const App = {
+      template: `<div @click="onClick">
+        count: {{count}}</div>
+        <div>doubleCount: {{doubleCount}}</div>
+        `,
+      setup(){
+        const state = reactive({
+          count: 0,
+          foo: 'foo'
+        })
+        function onClick(){
+          state.count += 1;
+        }
+        onMounted(()=>{
+          console.log('App挂载了');
+        })
+        // 计算属性：接收一个getter函数，返回响应的，不可变的Ref对象
+        const doubleCount = computed(() => state.count * 2)
+        // 侦听器
+        watch(()=>{
+          console.log('count变了'+state.count);
+        })
+        // 返回的对象将来会和render函数上下文合并，这样template的message可以直接访问到
+        return {...toRefs(state), onClick, doubleCount}
+      }
+    }
+    createApp(App).mount('#app')
+  </script>
+</body>
+</html>

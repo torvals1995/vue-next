@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  
+  <div id="app"></div>
+  <script src="../dist/vue.global.js"></script>
+  <script>
+    const { createApp, reactive, onMounted, onUnmounted, toRefs } = Vue;
+    // 鼠标位置侦听逻辑
+    function useMouse() {
+      const state = reactive({ x: 0, y: 0 })
+      const update = e => {
+        state.x = e.pageX
+        state.y = e.pageY
+      }
+      onMounted(() => {
+        window.addEventListener('mousemove', update)
+      })
+      onUnmounted(() => {
+        window.removeEventListener('mousemove', update)
+      })
+      return toRefs(state)
+    }
+    // 时间监测逻辑
+    function useTime() {
+      const state = reactive({ time: new Date() })
+      onMounted(() => {
+        setInterval(() => {
+          state.time = new Date()
+        }, 1000)
+      })
+      return toRefs(state)
+    }
+    // 逻辑组合
+    const MyComp = {
+      template: `
+        <div>x: {{ x }} y: {{ y }}</div>
+        <p>time: {{time}}</p>
+      `,
+      setup() {
+        // 更好的变量输出
+        // 使用鼠标逻辑
+        const { x, y } = useMouse()
+        // 使用时间逻辑
+        const { time } = useTime()
+        return { x, y, time }
+      }
+    }
+    createApp(MyComp).mount('#app')
+  </script>
+</body>
+</html>
